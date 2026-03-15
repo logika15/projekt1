@@ -304,46 +304,55 @@ if __name__ == "__main__":
         def level_3(self):
             # Скопируйте сюда весь код метода level_3, который я написал выше
             pass 
+    def show_final_results(self):
+        self.clear_screen()
+        self.root.config(bg=self.colors["bg"])
+        
+        tk.Label(
+            self.root, 
+            text="QUEST COMPLETED!", 
+            font=("Segoe UI", 24, "bold"), 
+            fg=self.colors["gold"], 
+            bg=self.colors["bg"]
+        ).pack(pady=30)
 
-    # ЗАПУСК ТЕСТА
-    # TestGame()
-        class MyGame:
-            def __init__(self, root):
-                self.root = root
-                self.root.title("Супер Квест 2026")
-                self.root.geometry("800x600")
-            
-            # --- ВСТАВЛЯТЬ СЮДА ---
-            self.colors = {
-                "bg": "#2C3E50",      # Темно-синий фон
-                "accent": "#3498DB",  # Голубые кнопки
-                "text": "#ECF0F1",    # Белый текст
-                "gold": "#F1C40F"     # Золотой для заголовков
-            }
+        tk.Label(
+            self.root, 
+            text=f"Ваш финальный счет: {self.score}", 
+            font=("Segoe UI", 16), 
+            fg=self.colors["text"], 
+            bg=self.colors["bg"]
+        ).pack(pady=10)
 
-            self.btn_style = {
-                "font": ("Segoe UI", 12, "bold"),
-                "bg": self.colors["accent"],
-                "fg": "white",
-                "relief": "flat",
-                "padx": 20,
-                "pady": 10
-            }
-            # ----------------------
+        # Кнопка выхода
+        tk.Button(
+            self.root, 
+            text="Выйти из игры", 
+            command=self.quit_game, 
+            **self.btn_style
+        ).pack(pady=20)
 
-            self.level = 1
-            self.main_menu() # Запуск начального экрана
+    def quit_game(self):
+        # Закрываем сокет перед выходом, чтобы сервер не выдал ошибку
+        try:
+            self.client.send("QUIT".encode('utf-8'))
+            self.client.close()
+        except:
+            pass
+        self.root.destroy()
 
-        def level_1(self):
-            self.clear_screen()
-            self.root.config(bg=self.colors["bg"]) # Используем цвет из настроек
-            
-            # Пример кнопки с использованием стиля:
-            btn = tk.Button(self.root, text="Начать", **self.btn_style) 
-            btn.pack(pady=20)
-
+    def restart_game(self):
+        self.score = 0
+        self.level = 1
+        # Можно отправить серверу уведомление о рестарте, если нужно
+        try:
+            self.client.send("RESTART:0".encode('utf-8'))
+        except:
+            pass
+        self.main_menu()
+        
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry("400x400")
+    root.geometry("600x450")
     app = QuestClient(root)
     root.mainloop()
